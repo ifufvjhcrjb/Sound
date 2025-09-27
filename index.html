@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Lagu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #121212;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #1db954;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 30px;
+            border: none;
+            border-radius: 8px;
+            background-color: #333;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+        .song-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .song-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .song-item img {
+            width: 120px;
+            height: 120px;
+            margin-right: 30px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+        }
+        .song-item audio {
+            width: 100%;
+            border-radius: 8px;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #444;
+            border-radius: 8px;
+        }
+        audio::-webkit-media-controls-play-button {
+            color: #fff;
+        }
+        audio::-webkit-media-controls-mute-button {
+            color: #fff;
+        }
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+            color: #fff;
+        }
+        audio::-webkit-media-controls-timeline {
+            background-color: #555;
+            border-radius: 5px;
+        }
+        audio::-webkit-media-controls-timeline-thumb {
+            background-color: #1db954;
+        }
+        /* Style untuk sembunyikan sementara */
+        .hidden {
+            display: none;
+        }
+
+        /* Tambahan animasi */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .song-item {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-music"></i> Daftar Lagu</h1>
+        <input type="text" id="search-input" placeholder="Cari lagu...  <i class='fas fa-search'></i>">
+        <div id="song-list">
+            <!-- Daftar lagu akan ditampilkan di sini -->
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk memuat data dari sound.json
+        async function loadSongs() {
+            const response = await fetch('sound.json');
+            const songs = await response.json();
+            return songs;
+        }
+
+        // Fungsi untuk menampilkan daftar lagu
+        function displaySongs(songs) {
+            const songListDiv = document.getElementById('song-list');
+            songListDiv.innerHTML = ''; // Kosongkan daftar sebelum menampilkan yang baru
+
+            songs.forEach((song, index) => {
+                const songItemDiv = document.createElement('div');
+                songItemDiv.classList.add('song-item');
+                songItemDiv.style.animationDelay = `${index * 0.1}s`; // Delay animasi untuk setiap item
+
+                const img = document.createElement('img');
+                img.src = song.gambar;
+                img.alt = song.nama;
+
+                const audio = document.createElement('audio');
+                audio.src = song.link_lagu;
+                audio.controls = true;
+
+                songItemDiv.appendChild(img);
+                songItemDiv.appendChild(audio);
+
+                songListDiv.appendChild(songItemDiv);
+            });
+        }
+
+        // Fungsi untuk melakukan pencarian
+        function searchSongs(songs, searchTerm) {
+            searchTerm = searchTerm.toLowerCase();
+            return songs.filter(song => song.nama.toLowerCase().includes(searchTerm));
+        }
+
+        // Event listener untuk input pencarian
+        document.getElementById('search-input').addEventListener('input', async function() {
+            const searchTerm = this.value;
+            const allSongs = await loadSongs();
+            const filteredSongs = searchSongs(allSongs, searchTerm);
+            displaySongs(filteredSongs);
+        });
+
+        // Inisialisasi: memuat dan menampilkan semua lagu saat halaman dimuat
+        async function initialize() {
+            const songs = await loadSongs();
+            displaySongs(songs);
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
